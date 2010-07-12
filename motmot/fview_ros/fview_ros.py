@@ -18,7 +18,6 @@ except ImportError, err:
 
 if have_ROS:
     roslib.load_manifest('sensor_msgs')
-    from std_msgs.msg import String
     from sensor_msgs.msg import Image
     import rospy
     import rospy.core
