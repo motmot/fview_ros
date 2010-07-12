@@ -54,7 +54,7 @@ class FviewROS(traited_plugin.HasTraits_FViewPlugin):
                  self.publisher = rospy.Publisher('%s/image_raw'%self.topic_prefix,
                                                   Image,
                                                   tcp_nodelay=True,
-                                                  latch=True )
+                                                  )
 
     def camera_starting_notification(self,cam_id,
                                      pixel_format=None,
