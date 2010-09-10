@@ -5,7 +5,6 @@ import warnings, threading
 import enthought.traits.api as traits
 
 import motmot.fview.traited_plugin as traited_plugin
-import motmot.fview_ext_trig.ttrigger as ttrigger
 import numpy as np
 
 from enthought.traits.ui.api import View, Item, Group
