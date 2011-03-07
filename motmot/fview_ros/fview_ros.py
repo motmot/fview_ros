@@ -33,7 +33,7 @@ class FviewROS(traited_plugin.HasTraits_FViewPlugin):
     def __init__(self,*args,**kwargs):
         super( FviewROS, self).__init__(*args,**kwargs)
         if have_ROS:
-            rospy.init_node('fview_ros',
+            rospy.init_node('fview', # common name across all plugins so multiple calls to init_node() don't fail
                             anonymous=True, # allow multiple instances to run
                             disable_signals=True, # let WX intercept them
                             )
