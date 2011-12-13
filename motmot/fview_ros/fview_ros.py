@@ -2,12 +2,16 @@ from __future__ import with_statement, division
 
 import pkg_resources
 import warnings, threading
-import enthought.traits.api as traits
+try:
+    import enthought.traits.api as traits
+    from enthought.traits.ui.api import View, Item, Group
+except ImportError:
+    # traits 4
+    import traits.api as traits
+    from traitsui.api import View, Item, Group
 
 import motmot.fview.traited_plugin as traited_plugin
 import numpy as np
-
-from enthought.traits.ui.api import View, Item, Group
 
 try:
     import roslib
