@@ -21,7 +21,7 @@ except ImportError, err:
 
 if have_ROS:
     roslib.load_manifest('sensor_msgs')
-    from sensor_msgs.msg import Image
+    from sensor_msgs.msg import Image, CameraInfo
     import rospy
     import rospy.core
 
@@ -57,6 +57,10 @@ class FviewROS(traited_plugin.HasTraits_FViewPlugin):
                                                   Image,
                                                   tcp_nodelay=True,
                                                   )
+                 self.publisher_cam_info = rospy.Publisher('%s/camera_info'%self.topic_prefix,
+                                                           CameraInfo,
+                                                           tcp_nodelay=True,
+                                                           )
 
     def camera_starting_notification(self,cam_id,
                                      pixel_format=None,
@@ -91,6 +95,12 @@ class FviewROS(traited_plugin.HasTraits_FViewPlugin):
             msg.step = width
             msg.data = npbuf.tostring() # let numpy convert to string
 
+            cam_info = CameraInfo()
+            cam_info.header.stamp = msg.header.stamp
+            cam_info.header.seq = msg.header.seq
+            cam_info.header.frame_id = msg.header.frame_id
+
             with self.publisher_lock:
                 self.publisher.publish(msg)
+                self.publisher_cam_info.publish(cam_info)
         return [],[]
