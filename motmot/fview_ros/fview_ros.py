@@ -99,6 +99,8 @@ class FviewROS(traited_plugin.HasTraits_FViewPlugin):
             cam_info.header.stamp = msg.header.stamp
             cam_info.header.seq = msg.header.seq
             cam_info.header.frame_id = msg.header.frame_id
+            cam_info.width = width
+            cam_info.height = height
 
             with self.publisher_lock:
                 self.publisher.publish(msg)
