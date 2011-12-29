@@ -28,6 +28,7 @@ if have_ROS:
 class FviewROS(traited_plugin.HasTraits_FViewPlugin):
     plugin_name = 'FView ROS'
     publisher = traits.Any(transient=True)
+    publisher_cam_info = traits.Any(transient=True)
     encoding = traits.String(transient=True)
     topic_prefix = traits.String
 
@@ -43,6 +44,7 @@ class FviewROS(traited_plugin.HasTraits_FViewPlugin):
                             )
         self.publisher_lock = threading.Lock()
         self.publisher = None
+        self.publisher_cam_info = None
         self._topic_prefix_changed()
 
     def _topic_prefix_changed(self):
@@ -50,6 +52,8 @@ class FviewROS(traited_plugin.HasTraits_FViewPlugin):
             # unregister old publisher
             if self.publisher is not None:
                 self.publisher.unregister()
+            if self.publisher_cam_info is not None:
+                self.publisher_cam_info.unregister()
 
             # register a new publisher
             if have_ROS:
