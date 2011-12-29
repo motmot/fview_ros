@@ -22,6 +22,7 @@ except ImportError, err:
 if have_ROS:
     roslib.load_manifest('sensor_msgs')
     from sensor_msgs.msg import Image, CameraInfo
+    import sensor_msgs.srv
     import rospy
     import rospy.core
 
@@ -29,6 +30,8 @@ class FviewROS(traited_plugin.HasTraits_FViewPlugin):
     plugin_name = 'FView ROS'
     publisher = traits.Any(transient=True)
     publisher_cam_info = traits.Any(transient=True)
+    set_camera_info_service = traits.Any(transient=True)
+    camera_info = traits.Any(transient=True)
     encoding = traits.String(transient=True)
     topic_prefix = traits.String
 
@@ -45,6 +48,11 @@ class FviewROS(traited_plugin.HasTraits_FViewPlugin):
         self.publisher_lock = threading.Lock()
         self.publisher = None
         self.publisher_cam_info = None
+        with self.publisher_lock:
+            self.camera_info = CameraInfo()
+            self.set_camera_info_service = rospy.Service('~set_camera_info',
+                                                         sensor_msgs.srv.SetCameraInfo,
+                                                         self.handle_set_camera_info)
         self._topic_prefix_changed()
 
     def _topic_prefix_changed(self):
@@ -65,6 +73,17 @@ class FviewROS(traited_plugin.HasTraits_FViewPlugin):
                                                            CameraInfo,
                                                            tcp_nodelay=True,
                                                            )
+
+
+    def handle_set_camera_info(self,request):
+        # this runs in a thread that ROS started
+        with self.publisher_lock:
+            self.camera_info = request.camera_info
+
+            response = sensor_msgs.srv.SetCameraInfoResponse()
+            response.success = True
+            response.status_message = "OK"
+            return response
 
     def camera_starting_notification(self,cam_id,
                                      pixel_format=None,
@@ -99,14 +118,14 @@ class FviewROS(traited_plugin.HasTraits_FViewPlugin):
             msg.step = width
             msg.data = npbuf.tostring() # let numpy convert to string
 
-            cam_info = CameraInfo()
-            cam_info.header.stamp = msg.header.stamp
-            cam_info.header.seq = msg.header.seq
-            cam_info.header.frame_id = msg.header.frame_id
-            cam_info.width = width
-            cam_info.height = height
-
             with self.publisher_lock:
+                cam_info = self.camera_info
+                cam_info.header.stamp = msg.header.stamp
+                cam_info.header.seq = msg.header.seq
+                cam_info.header.frame_id = msg.header.frame_id
+                cam_info.width = width
+                cam_info.height = height
+
                 self.publisher.publish(msg)
                 self.publisher_cam_info.publish(cam_info)
         return [],[]
